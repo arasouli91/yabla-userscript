@@ -231,7 +231,7 @@ const html = `
 (function () {
     'use strict';
     document.querySelector("body").innerHTML = html;
-
+    //#region begin
     function hideDropdowns() {
         $('.dropdown').hide();
         edMenuDismiss(true);
@@ -477,7 +477,6 @@ const html = `
             }, this.opts.poll_resolution);
             return this;
         },
-
         pause: function () {
             if (!this.paused && !this.disabled) {
                 this.paused = true;
@@ -585,8 +584,9 @@ const html = `
             return '#0a0';
         }
     });
+    //#endregion begin
 
-
+    //#region ChoiceQuestion
     ////////////////////////////////////////////LET'S EXPERIMENT WITH EXCLUDING THIS....not sure if i will be modifying it anyways...for now
     function ChoiceQuestion($elem, opts) {
         opts = $.extend(
@@ -739,7 +739,9 @@ const html = `
             this.flashShowCorrect(2000);
         }
     });
+    //#endregion choice question
 
+    //#region SpellQuestion
     function SpellQuestion($elem, opts) {
         opts = $.extend(
             {
@@ -949,7 +951,9 @@ const html = `
         }
     });
     $.extend(SpellQuestion.prototype, event_mixin, display_mixin);
+    //#endregion SpellQuestion
 
+    //#region SpeechQuestion
     function PromptForSpeech($elem) {
         this.init($elem);
     }
@@ -1162,7 +1166,9 @@ const html = `
 
 
     });
+    //#endregion SpeechQuestion
 
+    //#region GameController
     function GameController($elem, opts) {
         this.init($elem, opts);
     }
@@ -1490,7 +1496,9 @@ const html = `
 
     });
     $.extend(GameController.prototype, event_mixin);
+    //#endregion GameController
 
+    //#region Views and Progress
     function ProgressView(GC, $container) {
 
         this.init(GC, $container);
@@ -1718,10 +1726,9 @@ const html = `
             });
         }
     });
+    //#endregion Views and Progress
 
-
-
-
+    //#region SettingsManager
     function SettingsManager($elem) {
         this.init($elem)
     }
@@ -1885,6 +1892,9 @@ const html = `
         }
 
     });
+    //#endregion SettingsManager
+
+    //#region GameTypeController
     var GameTypeController = {
         type_options: {
             zh_CN: [
@@ -1995,7 +2005,9 @@ const html = `
         }
 
     }
+    //#endregion GameTypeController
 
+    //#region ListPreview
     var ListPreview = {
         init: function (cards, onclose) {
             this.callback = onclose;
@@ -2070,6 +2082,7 @@ const html = `
             this.callback();
         }
     }
+    //#endregion ListPreview
 
     var gc, settingsManager;
     $(function () {
