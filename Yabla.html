@@ -1,0 +1,227 @@
+<div id="main" class="">
+    <div class="mobile_top">
+        <div class="actions">
+            <table>
+                <tbody>
+                    <td class="settings show_settings"><i class="fa fa-gear"></i></td>
+                    <td class="mid">
+                        <div class="center_info">
+                            <div class="row">
+                                <div class="progress_label">Progress</div>
+                                <div class="word_complete_label">X of Y words learned</div>
+                            </div>
+                            <div class="overall_progress">
+                                <div class="bar"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="exit_btn"><i class="fa fa-close"></i></td>
+                </tbody>
+            </table>
+        </div>
+        <div class="progress timer">
+            <div class="bar"></div>
+        </div>
+    </div>
+    <div id="main_exit" class="exit_btn">
+        <i class="fa fa-close"></i>
+        <span>Exit</span>
+    </div>
+    <div id="left_col">
+        <div id="controls">
+            <a href="#" class="show_settings btn yabla-blue">
+                <i class="fa fa-gear"></i> Settings </a>
+        </div>
+        <div id="progress">
+            <h3>Overall Progress</h3>
+            <div id="progress_container">
+            </div>
+        </div>
+        <div id="timer">
+            <h3>Time Remaining</h3>
+            <div>
+                <div class="timer timer_26_275">
+                    <div class="fill_seg red"></div>
+                    <div class="fill_seg red"></div>
+                    <div class="fill_seg yellow"></div>
+                    <div class="fill_seg yellow"></div>
+                    <div class="fill_seg yellow"></div>
+                    <div class="fill_seg yellow"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                    <div class="fill_seg"></div>
+                </div>
+                <i class="fa fa-close timer_remove"></i>
+            </div>
+            <div class="pause_cont">
+                <a href="#" class="pause btn yabla-blue">
+                    <i class="fa fa-pause"></i> Pause </a>
+            </div>
+        </div>
+        <div id="queue_state">
+            <h3>Vocabulary Queue</h3>
+            <div id="queue_container">
+            </div>
+        </div>
+    </div>
+    <div id="right_col">
+        <div class="spell_question" style="display:none">
+            <h2>Word will be placed here</h2>
+            <div class="correction">
+                <span class="label">the correct answer is</span> <span class="correct">ZZZZ</span>
+                <i class="fa fa-volume-up"></i>
+            </div>
+            <div class="response_section">
+                <div id="ipad_tones">
+                    <button class="tone1">ˉ</button> <button class="tone2">ˊ</button> <button class="tone3">ˇ</button>
+                    <button class="tone4">ˋ</button> <button class="tone5">&nbsp;</button>
+                </div>
+                <div>
+                    <input type="text" class="response" lang="zh_CN" autocapitalize="off" autocorrect="off"
+                        autocomplete="randomworksbetter" spellcheck="false" />
+                </div>
+                <div class="bottom_spell_row">
+                    <div class="minikeyboard_container"> </div>
+                    <div class="dont_know">I don't Know</div>
+                </div>
+                <div class="continue_row">
+                    <button class="spell_continue btn yabla-blue">Continue</button>
+                </div>
+            </div>
+        </div>
+        <div class="image_question" style="display:none">
+            <h2>Word will be placed here</h2>
+            <div class="correction">
+                <span class="label">the correct answer is</span> <span class="correct">ZZZZ</span>
+                <i class="fa fa-volume-up"></i>
+            </div>
+            <div class="response_section">
+                <div id="ipad_tones">
+                    <!--This might be problematic having dupe id here and dupe buttons?-->
+                    <button class="tone1">ˉ</button> <button class="tone2">ˊ</button> <button class="tone3">ˇ</button>
+                    <button class="tone4">ˋ</button> <button class="tone5">&nbsp;</button>
+                </div>
+                <div>
+                    <input type="text" class="response" lang="zh_CN" autocapitalize="off" autocorrect="off"
+                        autocomplete="randomworksbetter" spellcheck="false" />
+                </div>
+                <div class="bottom_spell_row">
+                    <div class="minikeyboard_container"> </div>
+                    <div class="dont_know">I don't Know</div>
+                </div>
+                <div class="continue_row">
+                    <button class="image_continue btn yabla-blue">Continue</button>
+                </div>
+            </div>
+        </div>
+        <div class="choice_question">
+            <h2>
+                <span class="choice_text"></span>
+            </h2>
+            <div class="response_group clearfix">
+                <ul>
+                </ul>
+            </div>
+        </div>
+
+        <div class="speech_question">
+            <h2>
+                <span class="speech_prompt">Say this word</span>
+                <i class="fa fa-volume-up"></i>
+            </h2>
+            <div class="speech_meaning">Word Means This</div>
+            <div class="speech_response">
+                <div class="rec rec_alt_1">blah</div>
+                <div class="rec rec_alt_2">bleg</div>
+                <div class="rec rec_alt_3">blue</div>
+                <div class="rec_result correct">blank</div>
+            </div>
+            <div class="speech_buttons">
+                <button class="btn yabla-blue continue">Continue</button>
+                <button class="btn skip">Skip</button>
+            </div>
+            <div class="speech_controls">
+                <div class="start_microphone">
+                    <i class="fa fa-microphone"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="overlay_mask"> </div>
+<div id="pause_overlay" class="overlay">
+    Paused</div>
+<div id="settings_overlay" class="overlay">
+    <h2>Settings</h2>
+    <div class="setting_row">
+        <span class="setting_name">Term Queue Size</span>
+        <select name="queue_size">
+            <option value="3">3 (shabi)</option>
+            <option value="10">10</option>
+            <option value="50">50 (bucuo)</option>
+            <option value="100">100 (niubi)</option>
+            <option value="500">500 (wocao)</option>
+            <option value="666">666 (liuliuliu)</option>
+        </select> words
+    </div>
+    <div class="setting_row">
+        <span class="setting_name">Typing Tones</span>
+        <label>
+            <input type="radio" name="ignore_accents" id="ignore_accents1" value="1">
+            Ignore tones
+        </label>
+        <label>
+            <input type="radio" name="ignore_accents" id="ignore_accents0" value="">
+            Require correct tones
+        </label>
+    </div>
+    <div class="setting_row">
+        <span class="setting_name">Timer</span>
+        <label>
+            <input type="radio" name="show_timer" id="show_timer1" value="1"> Show Timer </label>
+        <label>
+            <input type="radio" name="show_timer" id="show_timer0" value=""> Disable Timer </label>
+    </div>
+    <div class="setting_row">
+        <span class="setting_name">Sound Effects</span>
+        <label>
+            <input type="radio" name="play_sfx" id="play_sfx1" value="1"> On </label>
+        <label>
+            <input type="radio" name="play_sfx" id="play_sfx0" value=""> Off </label>
+    </div>
+    <div class="setting_row set_char_type">
+        <span class="setting_name">Simplified vs Traditional</span>
+        <label>
+            <input type="radio" name="show_traditional" id="show_traditional0" value="" />
+            Show only Simplified </label>
+        <label>
+            <input type="radio" name="show_traditional" id="show_traditional1" value="1">
+            Show Simplified and Traditional </label>
+    </div>
+    <div class="setting_row">
+        <a href="#" class="btn fill green save">Save</a> <a href="#" class="cancel">Cancel</a>
+    </div>
+
+</div>
+<div id="win_overlay" class="overlay">
+    <h1>Congratulations!</h1>
+    <h2>You have reviewed the vocabulary</h2>
+
+    <a href="vocabulary.php">Return to Word List</a>
+</div>
+<div id="preview_overlay" class="overlay">
+    <h1>Vocabulary Review</h1>
+
+    <p>In this exercise you will review the following words:</p>
+    <ul class="terms">
+    </ul>
+    <a href="#" class="start_game">Start Review</a>
+    <div id="type_selector_placeholder"></div>
+</div>
