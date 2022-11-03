@@ -26,15 +26,13 @@ const html = `
 							<div class="bar"></div>
 						</div>
 					</div>
-
 				</td>
-								<td class="exit_btn"><i class="fa fa-close"></i></td>
+				<td class="exit_btn"><i class="fa fa-close"></i></td>
 			</tbody></table>
 		</div>
 		<div class="progress timer">
 			<div class="bar"></div>
 		</div>
-
 	</div>
 	<div id="main_exit" class="exit_btn">
 		<i class="fa fa-close"></i>
@@ -48,22 +46,18 @@ const html = `
 		<div id="progress">
 		<h3>Overall Progress</h3>
 			<div id="progress_container">
-
 			</div>
 		</div>
-
 		<div id="timer">
 			<h3>Time Remaining</h3>
 			<div>
 				<div class="timer timer_26_275">
 						<div class="fill_seg red"></div>
 						<div class="fill_seg red"></div>
-
 						<div class="fill_seg yellow"></div>
 						<div class="fill_seg yellow"></div>
 						<div class="fill_seg yellow"></div>
 						<div class="fill_seg yellow"></div>
-
 						<div class="fill_seg"></div>
 						<div class="fill_seg"></div>
 						<div class="fill_seg"></div>
@@ -81,22 +75,16 @@ const html = `
 				<a href="#" class="pause btn yabla-blue">
 					<i class="fa fa-pause"></i> Pause				</a>
 			</div>
-
 		</div>
-
 		<div id="queue_state">
 			<h3>Vocabulary Queue</h3>
 			<div id="queue_container">
-
 			</div>
 		</div>
-
-
 	</div>
-
 	<div id="right_col">
 		<div class="spell_question" style="display:none">
-			<h2>Foo Bar</h2>
+			<h2>Word will be placed here</h2>
 			<div class="correction">
 				<span class="label">the correct answer is</span> <span class="correct">ZZZZ</span>
 				<i class="fa fa-volume-up"></i>
@@ -111,14 +99,33 @@ const html = `
 				</div>
 				<div class="bottom_spell_row">
 					<div class="minikeyboard_container"> </div>
-					<div class="spell_tip">
-						<div class="pinyin">Type the answer in pinyin.  Use <tt>1</tt>, <tt>2</tt>, <tt>3</tt>, <tt>4</tt>, <tt>5</tt> to type the tone. Type <tt>v</tt> for <tt>ü</tt>. (example: lánsè = <tt>lan2se4</tt>)
-						</div>
-					</div>
 					<div class="dont_know">I don't Know</div>
 				</div>
 				<div class="continue_row">
 					<button class="spell_continue btn yabla-blue">Continue</button>
+				</div>
+			</div>
+		</div>
+		<div class="image_question" style="display:none">
+			<h2>Word will be placed here</h2>
+			<div class="correction">
+				<span class="label">the correct answer is</span> <span class="correct">ZZZZ</span>
+				<i class="fa fa-volume-up"></i>
+			</div>
+			<div class="response_section">
+				<div id="ipad_tones"> <!--This might be problematic having dupe id here and dupe buttons?-->
+					<button class="tone1">ˉ</button> <button class="tone2">ˊ</button> <button class="tone3">ˇ</button> <button class="tone4">ˋ</button> <button class="tone5">&nbsp;</button>
+				</div>
+				<div>
+					<input type="text" class="response" lang="zh_CN"
+						autocapitalize="off" autocorrect="off" autocomplete="randomworksbetter" spellcheck="false" />
+				</div>
+				<div class="bottom_spell_row">
+					<div class="minikeyboard_container"> </div>
+					<div class="dont_know">I don't Know</div>
+				</div>
+				<div class="continue_row">
+					<button class="image_continue btn yabla-blue">Continue</button>
 				</div>
 			</div>
 		</div>
@@ -154,8 +161,6 @@ const html = `
 				</div>
 			</div>
 		</div>
-
-
 	</div>
 </div>
 <div id="overlay_mask"> </div>
@@ -166,11 +171,12 @@ const html = `
 	<div class="setting_row">
 		<span class="setting_name">Term Queue Size</span>
 			<select name="queue_size" >
-				<option value="3">3</option>
+				<option value="3">3 (shabi)</option>
 				<option value="10">10</option>
 				<option value="50">50 (bucuo)</option>
 				<option value="100">100 (niubi)</option>
 				<option value="500">500 (wocao)</option>
+				<option value="666">666 (liuliuliu)</option>
 			</select> words	</div>
 	<div class="setting_row">
 					<span class="setting_name">Typing Tones</span>
@@ -953,6 +959,221 @@ const html = `
     $.extend(SpellQuestion.prototype, event_mixin, display_mixin);
     //#endregion SpellQuestion
 
+    //#region ImageQuestion
+    function ImageQuestion($elem, opts) {
+        opts = $.extend(
+            {
+                timer: null,
+                wait_after_correct: 1000,
+                wait_after_incorrect: 4000,
+                lang_id: '',
+                case_sensitive: false,
+                ignore_accents: true,
+                ignore_regexp: /[\.\s\-;:]/g
+
+            }, opts || {})
+        this.init($elem, opts);
+    }
+    ///// How to refactor to use SpellQuestion functionality? Can we still use extend?
+    /// init: SpellQuestion.prototype.init ?... there wouldn't be an issue with closures right? this?
+    $.extend(ImageQuestion.prototype, {
+        init: function ($elem, opts) {
+            this.opts = opts;
+            this.$e = $elem;
+            this.$input = this.$e.find('.response');
+            var me = this;
+
+            Timer.bind('timeout', $.proxy(this.onTimeOut, this));
+
+            this.$e.find('.dont_know').bind(CLICK, $.proxy(this.onDontKnow, this));
+
+            if (this.opts.lang_id)
+                this.mk = new MiniKeyboard(
+                    this.$e.find('.response'),
+                    $('.minikeyboard_container'),
+                    this.opts.lang_id);
+
+            if (this.opts.lang_id == 'zh_CN' && IS_TOUCH_DEVICE) {
+                this.tk = new iPadToneKeys(this.$input, this.$e.find('#ipad_tones'));
+            } else {
+                this.$e.find('#ipad_tones').remove();
+            }
+
+            this.$input.bind("input", function (e) {
+                me.onChange();
+            }).on("keypress", function (e) {
+                if (e.keyCode == 13) {
+                    me.onEnter();
+                }
+            });
+
+            this.$e.find('.image_continue').on(CLICK, function () {
+                me.triggerComplete();
+            });
+
+        },
+        setValues: function (question, answer, audio, placeholder) {
+            this.answer = answer;
+            this.audio = audio;
+            this.$e.find('h2').text(question);
+            this.$input.val('').removeClass('correct incorrect').focus();
+            if (IS_TOUCH_DEVICE) {
+                $(window).scrollTop($('.mobile_top .actions').outerHeight());
+            }
+            this.state = 'PENDING_ANSWER';
+            this.$input.attr('placeholder', placeholder || '');
+            Timer.start(33000);
+            this.$e.find('.correction').css({ visibility: 'hidden' });
+
+            this.$e.find('.continue_row').hide();
+            this.$e.find('.bottom_spell_row').show();
+
+            return this;
+        },
+
+        onEnter: function () {
+
+            if (this.state != 'PENDING_ANSWER')
+                return;
+
+            Timer && Timer.pause();
+
+            var r;
+            var self = this;
+
+            if (this.compare(this.$input.val(), this.answer)) {
+                settingsManager.get('play_sfx') && AudioPlayer.correct.play();
+                this.audio && setTimeout(function () { self.audio.play(); }, 500);
+                this.flashGoodJob(3500);
+                r = { correct: true };
+            } else {
+                settingsManager.get('play_sfx') && AudioPlayer.incorrect.play();
+                this.audio && setTimeout(function () { self.audio.play(); }, 300);
+                this.flashShowCorrect(5000);
+                r = { correct: false };
+            }
+            this.trigger('response', r);
+
+            // this must come at the end, because it triggers a change event.
+            if ('ontouchstart' in window || !Timer.disabled) {
+                this.$input.blur();  // hide the ipad keyboard
+            }
+
+
+        },
+        onChange: function () {
+            // cleanup funky quotes
+            var val = this.$input.val();
+            var val_clean = $.replaceFunkyQuotes(val);
+            if (val != val_clean) {
+                this.$input.val(val_clean);
+                return this.onChange();
+            }
+
+
+            if (this.compare(this.$input.val(), this.answer)) {
+                this.onEnter();  // press the enter key for them.
+            }
+        },
+        onTimeOut: function () {
+            if (this.state != 'PENDING_ANSWER')
+                return;
+
+            this.flashShowCorrect(3000);
+            this.trigger('response', { timeout: true })
+        },
+        onDontKnow: function () {
+            Timer && Timer.pause();
+
+            this.trigger('response', { dont_know: true });
+            this.flashShowCorrect(3500);
+        },
+        flashShowCorrect: function (msec) {
+            var me = this;
+            this.state = 'SHOWING_CORRECT';
+            this.$input.addClass('incorrect');
+            this.$e.find('.correction .correct')
+                .text(this.answer)
+                .parent().css({ visibility: 'visible' })
+                .addClass(me.audio ? 'has_audio' : 'no_audio')
+                .off('click')
+                .on('click', function (e) {
+                    e.preventDefault();
+                    me.audio && me.audio.play();
+                });
+            var me = this;
+            if (Timer.disabled) {
+                this.$e.find('.continue_row').show()
+                    .find('.image_continue').trigger('focus');
+
+                this.$e.find('.bottom_spell_row').hide();
+            } else {
+                setTimeout(function () {
+                    me.triggerComplete()
+                },
+                    msec
+                );
+            }
+
+        },
+        flashGoodJob: function (msec) {
+            this.state = 'SHOWING_CORRECT';
+            this.$input.val(this.answer);
+            this.$input.addClass('correct');
+            var me = this;
+            setTimeout(function () {
+                me.triggerComplete()
+            },
+                msec
+            );
+        },
+        triggerComplete: function () {
+            if (this.state !== 'DONE') {
+                this.state = 'DONE';
+                this.trigger("showCorrectComplete");
+            }
+        },
+        _accentRegexps: [
+            [/[àâäåãáāǎ]/g, 'a'],
+            [/[æ]/g, 'ae'],
+            [/[ç]/g, 'c'],
+            [/[éèēěêë]/g, 'e'],
+            [/[ïîìíīǐ]/g, 'i'],
+            [/[ñ]/g, 'n'],
+            [/[öôóòōǒõ]/g, 'o'],
+            [/[œ]/g, 'oe'],
+            [/[ùûüúūúǔ]/g, 'u'],
+            [/[ǖǘǚǜü]/g, 'ü']
+        ],
+        removeAccents: function (s) {
+            for (var i in this._accentRegexps) {
+                s = s.replace(this._accentRegexps[i][0], this._accentRegexps[i][1]);
+            }
+            return s;
+        },
+        removeOuterPunction: function (s) {
+            s = s.replace(/^[\.\?¿¡'"]+/, '');
+            s = s.replace(/[\.\?¿¡'"]+$/, '');
+            return s;
+        },
+        compare: function (a, b) {
+            a = this.removeOuterPunction(a.toLowerCase());
+            b = this.removeOuterPunction(b.toLowerCase());
+            if (this.opts.ignore_regexp) {
+                a = a.replace(this.opts.ignore_regexp, '');
+                b = b.replace(this.opts.ignore_regexp, '');
+            }
+            if (this.opts.ignore_accents) {
+                a = this.removeAccents(a);
+                b = this.removeAccents(b);
+            }
+            return a == b;
+        }
+    });
+    $.extend(ImageQuestion.prototype, event_mixin, display_mixin);
+    //#endregion ImageQuestion
+
+
     //#region SpeechQuestion
     function PromptForSpeech($elem) {
         this.init($elem);
@@ -1191,16 +1412,19 @@ const html = `
                 Timer.resume();
             });
 
-            if (this.opts.lang_id.substr(0, 2) != 'zh') {
-                $('.spell_tip').hide()
-            }
-
             this.spell_question = new SpellQuestion(
                 $('.spell_question'),
                 { lang_id: this.opts.lang_id }
             );
             this.spell_question.bind("response", function (e, a) { me.afterAnswer(a); });
             this.spell_question.bind("showCorrectComplete", $.proxy(this.afterShowCorrect, this));
+
+            this.image_question = new ImageQuestion(
+                $('.image_question'),
+                { lang_id: this.opts.lang_id }
+            );
+            this.image_question.bind("response", function (e, a) { me.afterAnswer(a); });
+            this.image_question.bind("showCorrectComplete", $.proxy(this.afterShowCorrect, this));
 
             this.choice_question = new ChoiceQuestion($('.choice_question'));
             this.choice_question.bind("response", function (e, a) { me.afterAnswer(a); });
@@ -1240,6 +1464,7 @@ const html = `
                     this.opts.queue_size = opts[i]
                 } else if (i == 'ignore_accents') {
                     this.spell_question.opts.ignore_accents = !!opts[i];
+                    this.image_question.opts.ignore_accents = !!opts[i];
                 } else if (i == 'show_timer') {
                     Timer[opts[i] ? "enable" : "disable"]();
                 } else if (i == 'show_traditional') {
@@ -1393,10 +1618,12 @@ const html = `
         },
         showQuestion: function () {
             var queue_item = this.queue[this.queue_index];
-
+            /////////RIGHTNOW: WHAT TO DO ABOUT GAME TYPE?
+            //// WHAT IS A QUEUE ITEM? HOW WILL WE HAVE OUR QUESTION TYPES ASSOCIATED WITH QUEUE ITEMS?
             var game_type = this.games[queue_item.progress];
             this.choice_question.hide();
             this.spell_question.hide();
+            this.image_question.hide();
             this.prompt_for_speech.hide();
             this.speech_question.hide();
             if (game_type == "front_back") {
@@ -1905,7 +2132,8 @@ const html = `
                 { type: "pinyin_hanzi", label: "Multiple Choice: 汉字 » Pīnyīn", preselected: false },
                 { type: "speech", label: "Speaking Practice (microphone required)", preselected: true, requires_speech: true },
                 { type: "spell", label: "Type Answer: Pīnyīn", preselected: true },
-                { type: "spell_hanzi", label: "Type Answer: 汉字", preselected: false }
+                { type: "spell_hanzi", label: "Type Answer: 汉字", preselected: false },
+                { type: "image", label: "Type Answer: Pīnyīn", preselected: true },
             ],
             std_lang: [
                 {
