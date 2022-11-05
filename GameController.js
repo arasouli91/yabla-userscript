@@ -22,14 +22,14 @@ $.extend(GameController.prototype, {
         });
 
         this.spell_question = new SpellQuestion(
-            $('.spell_question'),
+            $('#spell_question'),
             { lang_id: this.opts.lang_id }
         );
         this.spell_question.bind("response", function (e, a) { me.afterAnswer(a); });
         this.spell_question.bind("showCorrectComplete", $.proxy(this.afterShowCorrect, this));
 
         this.image_question = new ImageQuestion(
-            $('.image_question'),
+            $('#image_question'),
             { lang_id: this.opts.lang_id }
         );
         this.image_question.bind("response", function (e, a) { me.afterAnswer(a); });
@@ -83,11 +83,11 @@ $.extend(GameController.prototype, {
             }
         }
     },
-    afterAnswer: function (a) {
+    afterAnswer: function (response) {
 
         var qi = this.queue[this.queue_index];
 
-        if (a.correct) {
+        if (response.correct) {
             qi.known_count++;
             this.response_counts.known_count++;
             qi.progress++;
@@ -97,10 +97,10 @@ $.extend(GameController.prototype, {
                 this.queue[this.queue_index] = null;
             }
 
-        } else if (a.timeout) {
+        } else if (response.timeout) {
             qi.timeout_count++;
             this.response_counts.timeout_count++;
-        } else {
+        } else { // don't know
             qi.unknown_count++;
             this.response_counts.unknown_count++;
 
@@ -121,12 +121,11 @@ $.extend(GameController.prototype, {
                 unknown_count: queue_item.unknown_count,
                 timeout_count: queue_item.timeout_count
             },
-            function (data) {
-                // don't really need to do anything
-            });
+            () => { });
     },
-    afterShowCorrect: function () {
-        this.showNextQuestion();
+    ///////// do we really even need to make async go all the way up? as long as it is at one level, there is an await and execution has to stay there
+    afterShowCorrect: async function () {
+        await this.showNextQuestion();
     },
     start: function () {
         this.showNextQuestion()
@@ -151,13 +150,13 @@ $.extend(GameController.prototype, {
             }
         );
     },
-    showNextQuestion: function () {
+    showNextQuestion: async function () {
         this.fillQueue();
         this.getNextQueueIndex();
         this.trigger("queueChange", this.queueState());
 
         if (this.queue_index > -1)
-            this.showQuestion(this.queue_index);
+            await this.showQuestion(this.queue_index);
         else
             this.onWin();
     },
@@ -225,10 +224,9 @@ $.extend(GameController.prototype, {
         }
 
     },
-    showQuestion: function () {
+    // The card in the queue_item is populated from the received cards json
+    showQuestion: async function () {
         var queue_item = this.queue[this.queue_index];
-        /////////RIGHTNOW: WHAT TO DO ABOUT GAME TYPE?
-        //// WHAT IS A QUEUE ITEM? HOW WILL WE HAVE OUR QUESTION TYPES ASSOCIATED WITH QUEUE ITEMS?
         var game_type = this.games[queue_item.progress];
         this.choice_question.hide();
         this.spell_question.hide();
@@ -271,6 +269,15 @@ $.extend(GameController.prototype, {
                 queue_item.card.back,
                 queue_item.card.spell || queue_item.card.front,
                 queue_item.card.front_audio
+            );
+        } else if (game_type == "image") {
+            this.image_question.show().setValues(
+                queue_item.card.back,
+                queue_item.card.spell || queue_item.card.front,
+                queue_item.card.front_audio,
+                ///// We need an image, we can map hanzi words to image names, that is card.word, but it is unicode char
+                ////////do we really want to await here??...yes that way we don't waste the requests
+                await ImageHandler.GetImages(queue_item.card.hanzi)
             );
         } else if (game_type == "spell_hanzi") {
             this.spell_question.show().setValues(

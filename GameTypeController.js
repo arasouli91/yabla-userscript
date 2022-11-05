@@ -10,7 +10,7 @@ var GameTypeController = {
             { type: "speech", label: "Speaking Practice (microphone required)", preselected: true, requires_speech: true },
             { type: "spell", label: "Type Answer: Pīnyīn", preselected: true },
             { type: "spell_hanzi", label: "Type Answer: 汉字", preselected: false },
-            { type: "image", label: "Type Answer: Pīnyīn", preselected: true },
+            { type: "image", label: "View Image, Type Answer: Pīnyīn", preselected: true },
         ],
         std_lang: [
             {
@@ -74,9 +74,7 @@ var GameTypeController = {
         this.setGames();
     },
     setGames: function () {
-
         this.gc.setGames(this.selected_games);
-
     },
     getDOM: function () {
         var me = this;

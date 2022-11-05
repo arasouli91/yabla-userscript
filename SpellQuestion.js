@@ -3,8 +3,8 @@ function SpellQuestion($elem, opts) {
     opts = $.extend(
         {
             timer: null,
-            wait_after_correct: 1000,
-            wait_after_incorrect: 4000,
+            wait_after_correct: 850,
+            wait_after_incorrect: 3000,
             lang_id: '',
             case_sensitive: false,
             ignore_accents: true,
@@ -24,12 +24,13 @@ $.extend(SpellQuestion.prototype, {
 
         this.$e.find('.dont_know').bind(CLICK, $.proxy(this.onDontKnow, this));
 
-        if (this.opts.lang_id)
+        // mobile logic
+        if (this.opts.lang_id) {
             this.mk = new MiniKeyboard(
                 this.$e.find('.response'),
                 $('.minikeyboard_container'),
                 this.opts.lang_id);
-
+        }
         if (this.opts.lang_id == 'zh_CN' && IS_TOUCH_DEVICE) {
             this.tk = new iPadToneKeys(this.$input, this.$e.find('#ipad_tones'));
         } else {
