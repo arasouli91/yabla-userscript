@@ -1,43 +1,48 @@
-class ImageHandler {
+class ImageHandler
+{
     // turn this into a loop over all our api_keys
-    static async GetImages(hanzi) {
-
-        return [
-            {
-                "w": 400,
-                "h": 265,
-                "src": "https://m.18zhongyao.com/uploads/allimg/200517/1-20051H22910M8.jpg"
-            },
-            {
-                "w": 500,
-                "h": 333,
-                "src": "https://img03.sogoucdn.com/v2/thumb/retype_exclude_gif/ext/auto/crop/xy/ai/w/500/h/333?appid=200698&url=https://pic.baike.soso.com/ugc/baikepic2/0/20160801093508-1687346331.jpg/0"
-            },
-            {
-                "w": 1009,
-                "h": 671,
-                "src": "https://pic.baike.soso.com/ugc/baikepic2/0/20170729200910-867812304.jpg/1284"
-            },
-            {
-                "w": 980,
-                "h": 514,
-                "src": "https://app.ninchanese.com/image/word/traditional/246835/%E8%8A%B8%E8%8B%94%E5%AD%90.jpg"
-            },
-            {
-                "w": 1008,
-                "h": 665,
-                "src": "https://www.18zhongyao.com/uploads/allimg/200517/1-20051H22929C6.jpg"
-            }
-        ];
+    static async GetImages(hanzi)
+    {
+        /*      // return fake data
+                return [
+                    {
+                        "w": 400,
+                        "h": 265,
+                        "src": "https://m.18zhongyao.com/uploads/allimg/200517/1-20051H22910M8.jpg"
+                    },
+                    {
+                        "w": 500,
+                        "h": 333,
+                        "src": "https://img03.sogoucdn.com/v2/thumb/retype_exclude_gif/ext/auto/crop/xy/ai/w/500/h/333?appid=200698&url=https://pic.baike.soso.com/ugc/baikepic2/0/20160801093508-1687346331.jpg/0"
+                    },
+                    {
+                        "w": 1009,
+                        "h": 671,
+                        "src": "https://pic.baike.soso.com/ugc/baikepic2/0/20170729200910-867812304.jpg/1284"
+                    },
+                    {
+                        "w": 980,
+                        "h": 514,
+                        "src": "https://app.ninchanese.com/image/word/traditional/246835/%E8%8A%B8%E8%8B%94%E5%AD%90.jpg"
+                    },
+                    {
+                        "w": 1008,
+                        "h": 665,
+                        "src": "https://www.18zhongyao.com/uploads/allimg/200517/1-20051H22929C6.jpg"
+                    }
+                ];
+                */
 
         let query = `https://expressjs-prisma-production-140f.up.railway.app/img/${encodeURIComponent(hanzi)}`;
         let res = await (await fetch(query)).json();//, { method: "GET", mode: "no-cors" })
         let ret = []
         let len = 5;
         // get top 5 results
-        for (var i = 0; i < len; ++i) {
+        for (var i = 0; i < len; ++i)
+        {
             if (res.images_results[i].original.endsWith(".svg")
-                || res.images_results[i].original.includes("ninchanese")) {
+                || res.images_results[i].original.includes("ninchanese"))
+            {
                 ++len; continue; // skip svg, skip results that give away answer
             }
             let sum = res.images_results[i].original_height + res.images_results[i].original_width;
