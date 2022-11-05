@@ -1,3 +1,7 @@
 .image_row {
     display: flex;
+    padding-top: 100px;
+    flex-direction: column;
+    height: 800px;
+    overflow-y: scroll;
 }

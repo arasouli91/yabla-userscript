@@ -244,6 +244,10 @@ const html = `<div id="main" class="">
 
 styles = `.image_row {
     display: flex;
+    padding-top: 100px;
+    flex-direction: column;
+    height: 800px;
+    overflow-y: scroll;
 }`;
 var styleSheet = document.createElement('style')
 styleSheet.innerText = styles
@@ -1512,6 +1516,8 @@ $.extend(GameController.prototype, {
             qi.timeout_count++;
             this.response_counts.timeout_count++;
         } else { // don't know
+            //////////////////////Why are we coming in here?
+            //// this isn't for don't know? We got wrong answer
             qi.unknown_count++;
             this.response_counts.unknown_count++;
 
@@ -1535,8 +1541,8 @@ $.extend(GameController.prototype, {
             () => { });
     },
     ///////// do we really even need to make async go all the way up? as long as it is at one level, there is an await and execution has to stay there
-    afterShowCorrect: async function () {
-        await this.showNextQuestion();
+    afterShowCorrect: function () {
+        this.showNextQuestion();
     },
     start: function () {
         this.showNextQuestion()
