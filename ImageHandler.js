@@ -1,3 +1,39 @@
+function wait(delay)
+{
+    return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+let triesLeft = 0;
+function fetchRetry(url, delay, tries, fetchOptions = {})
+{
+    function onError(err)
+    {
+        triesLeft = tries - 1;
+        if (!triesLeft)
+        {
+            return;
+        }
+        return wait(delay).then(() => fetchRetry(url, delay, triesLeft, fetchOptions).catch(e => ""));
+    }
+    //idk what to do, this is just going to keep throwing error not catching, but app still runs
+    return fetch(url, fetchOptions).catch(onError);
+}
+
+async function imageExists(imgUrl)
+{
+    if (!imgUrl)
+    {
+        return false;
+    }
+    return new Promise(res =>
+    {
+        const image = new Image();
+        image.onload = () => res(true);
+        image.onerror = () => res(false);
+        image.src = imgUrl;
+    });
+}
+
 class ImageHandler
 {
     // turn this into a loop over all our api_keys
@@ -34,14 +70,28 @@ class ImageHandler
                 */
 
         let query = `https://expressjs-prisma-production-140f.up.railway.app/img/${encodeURIComponent(hanzi)}`;
-        let res = await (await fetch(query)).json();//, { method: "GET", mode: "no-cors" })
+        let res;
         let ret = []
+        try
+        {
+            res = await (await fetchRetry(query, 800, 5)).json();//, { method: "GET", mode: "no-cors" })
+        } catch (e)
+        {
+            // give up after 5 tries
+            return ret;
+        }
+
         let len = 5;
         // get top 5 results
         for (var i = 0; i < len; ++i)
         {
-            if (res.images_results[i].original.endsWith(".svg")
-                || res.images_results[i].original.includes("ninchanese"))
+            if (imageExists(res.images_results[i]) === false
+                || res.images_results[i].original.endsWith(".svg")
+                || res.images_results[i].original.includes("ninchanese")
+                || res.images_results[i].original.includes("upload.wikimedia")
+                || res.images_results[i].original.includes("qianp")
+                || res.images_results[i].original.includes("gramwiki")
+                || res.images_results[i].original.includes("strokeorder"))
             {
                 ++len; continue; // skip svg, skip results that give away answer
             }

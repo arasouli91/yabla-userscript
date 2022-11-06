@@ -242,7 +242,7 @@ const html = `<div id="main" class="">
 
 styles = `.image_row {
     display: flex;
-    padding-top: 100px;
+    padding-top: 4px;
     flex-direction: column;
     height: 800px;
     overflow-y: scroll;
@@ -1518,6 +1518,7 @@ $.extend(GameController.prototype, {
         {
             qi.known_count++;
             this.response_counts.known_count++;
+            // each qi represents a card, each qi will progress through all the game types
             qi.progress++;
             this.trigger("queueChange", this.queueState());
             if (qi.progress >= this.games.length)
@@ -1636,37 +1637,55 @@ $.extend(GameController.prototype, {
         for (var i = 0; i < qs; i++)
         {
             if (!this.queue[i] && this.card_index < this.cards.length)
+            {
+                // Create new queue item
                 this.queue[i] = {
                     card: this.cards[this.card_index++],
                     progress: 0,
                     known_count: 0,
                     unknown_count: 0,
-                    timeout_count: 0
+                    timeout_count: 0,
+                    images: null        // we could just prefill all images here
                 };
+            }
         }
     },
-    // What is this garbage? some kind of shitty hack of a queue implementation?
-    getNextQueueIndex: function ()
+    // find next queue elem
+    getNextQueueIndex: async function () //////////does the caller need to be async as well?
     {
-        var index = this.queue_index;
+        var found = false;
+        var index = this.queue_index + 1; // start on the next index
+        this.queue_index = -1;          // if unfound, this indicates game is won
         // iterate circularly, potentially entire length of queue
         for (var i = 0, l = this.queue.length; i < l; i++)
         {
             // offset current index by i and then circle back to beginning
             var ndx = (index + i) % this.queue.length;
+            var queue_item = this.queue[ndx];
             // find next non null queue elem
-            if (this.queue[ndx])
+            if (found === false && queue_item)
             {
                 this.queue_index = ndx;
+                found = true;
+                continue;
+            }
+            // find next next elem that will be doing image mode and preload images
+            if (found === true && queue_item && this.games[queue_item.progress] === "image")
+            { // we start searching after finding the next queue item
+                // if no other nonnull elems, we won't find anything, if there's 1, we will definitely find
+                // preload images
+                if (queue_item.images === null){
+                    queue_item.images = await ImageHandler.GetImages(queue_item.card.hanzi);
+                }
+                return;
             }
         }
-        return -1; // all were null
     },
     // The card in the queue_item is populated from the received cards json
     showQuestion: async function ()
     {
         var queue_item = this.queue[this.queue_index];
-        var game_type = this.games[queue_item.progress];
+        var game_type = this.games[queue_item.progress]; //this.games represents all the selected gametypes
         this.choice_question.hide();
         this.spell_question.hide();
         this.image_question.hide();
@@ -1721,9 +1740,7 @@ $.extend(GameController.prototype, {
                 queue_item.card.back,
                 queue_item.card.spell || queue_item.card.front,
                 queue_item.card.front_audio,
-                ///// We need an image, we can map hanzi words to image names, that is card.word, but it is unicode char
-                ////////do we really want to await here??...yes that way we don't waste the requests
-                await ImageHandler.GetImages(queue_item.card.hanzi)
+                queue_item.images === null ? await ImageHandler.GetImages(queue_item.card.hanzi) : queue_item.images
             );
         } else if (game_type == "spell_hanzi")
         {
@@ -2383,6 +2400,41 @@ var ListPreview = {
 }
 //#endregion ListPreview
 
+function wait(delay)
+{
+    return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+function fetchRetry(url, delay, tries, fetchOptions = {})
+{
+    function onError(err)
+    {
+        triesLeft = tries - 1;
+        if (!triesLeft)
+        {
+            return;
+        }
+        return wait(delay).then(() => fetchRetry(url, delay, triesLeft, fetchOptions).catch(e => ""));
+    }
+
+    return fetch(url, fetchOptions).catch(onError);
+}
+
+async function imageExists(imgUrl)
+{
+    if (!imgUrl)
+    {
+        return false;
+    }
+    return new Promise(res =>
+    {
+        const image = new Image();
+        image.onload = () => res(true);
+        image.onerror = () => res(false);
+        image.src = imgUrl;
+    });
+}
+
 class ImageHandler
 {
     // turn this into a loop over all our api_keys
@@ -2419,14 +2471,28 @@ class ImageHandler
                 */
 
         let query = `https://expressjs-prisma-production-140f.up.railway.app/img/${encodeURIComponent(hanzi)}`;
-        let res = await (await fetch(query)).json();//, { method: "GET", mode: "no-cors" })
+        let res;
         let ret = []
+        try
+        {
+            res = await (await fetchRetry(query, 500, 5)).json();//, { method: "GET", mode: "no-cors" })
+        } catch (e)
+        {
+            // give up after 5 tries
+            return ret;
+        }
+
         let len = 5;
         // get top 5 results
         for (var i = 0; i < len; ++i)
         {
-            if (res.images_results[i].original.endsWith(".svg")
-                || res.images_results[i].original.includes("ninchanese"))
+            if (imageExists(res.images_results[i]) === false
+                || res.images_results[i].original.endsWith(".svg")
+                || res.images_results[i].original.includes("ninchanese")
+                || res.images_results[i].original.includes("upload.wikimedia")
+                || res.images_results[i].original.includes("qianp")
+                || res.images_results[i].original.includes("gramwiki")
+                || res.images_results[i].original.includes("strokeorder"))
             {
                 ++len; continue; // skip svg, skip results that give away answer
             }
