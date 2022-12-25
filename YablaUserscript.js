@@ -246,6 +246,11 @@ styles = `.image_row {
     flex-direction: column;
     height: 800px;
     overflow-y: scroll;
+}
+
+.trad_memo {
+    color: black;
+    font-size: 120%;
 }`;
 var styleSheet = document.createElement('style')
 styleSheet.innerText = styles
@@ -2405,6 +2410,7 @@ function wait(delay)
     return new Promise((resolve) => setTimeout(resolve, delay));
 }
 
+let triesLeft = 0;
 function fetchRetry(url, delay, tries, fetchOptions = {})
 {
     function onError(err)
@@ -2416,7 +2422,7 @@ function fetchRetry(url, delay, tries, fetchOptions = {})
         }
         return wait(delay).then(() => fetchRetry(url, delay, triesLeft, fetchOptions).catch(e => ""));
     }
-
+    //idk what to do, this is just going to keep throwing error not catching, but app still runs
     return fetch(url, fetchOptions).catch(onError);
 }
 
@@ -2475,7 +2481,7 @@ class ImageHandler
         let ret = []
         try
         {
-            res = await (await fetchRetry(query, 500, 5)).json();//, { method: "GET", mode: "no-cors" })
+            res = await (await fetchRetry(query, 800, 5)).json();//, { method: "GET", mode: "no-cors" })
         } catch (e)
         {
             // give up after 5 tries

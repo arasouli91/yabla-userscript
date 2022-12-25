@@ -5,3 +5,8 @@
     height: 800px;
     overflow-y: scroll;
 }
+
+.trad_memo {
+    color: black;
+    font-size: 120%;
+}
